@@ -1,0 +1,228 @@
+
+CREATE TABLE Node_appliance (
+                MAC_node VARCHAR(17) NOT NULL,
+                status VARCHAR(2) NOT NULL DEFAULT "On" ,
+                priority INTEGER NOT NULL DEFAULT 0 ,
+                id_appliance_type INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	        CONSTRAINT `Appliance_type_Node_appliance_fk`
+                FOREIGN KEY (`id_appliance_type`)
+                REFERENCES 'Appliance_type' (`id_appliance_type`)
+                ON DELETE NO ACTION
+                ON UPDATE NO ACTION 
+                NOT DEFERRABLE
+              
+);
+
+CREATE TABLE Appliance_type (
+                id_appliance_type INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
+                description VARCHAR(200) NOT NULL
+             
+);
+
+
+CREATE TABLE Data_month (
+                id_data INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
+                total DOUBLE NOT NULL,
+                month INTEGER NOT NULL,
+                year INTEGER NOT NULL,
+                MAC_node VARCHAR(17) NOT NULL,
+                CONSTRAINT `Node_appliance_Data_month_fk`
+                FOREIGN KEY (`MAC_node`)
+                REFERENCES 'Node_appliance' (`MAC_node`)
+                ON DELETE NO ACTION
+                ON UPDATE NO ACTION 
+                NOT DEFERRABLE);
+
+CREATE TABLE Data_consumer (
+                id_data_consumer INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
+                time_consumer datte NOT NULL,
+                tension DOUBLE NOT NULL,
+                current DOUBLE NOT NULL,
+                MAC_node VARCHAR(17) NOT NULL,
+                CONSTRAINT `Node_appliance_Data_consumer_fk`
+                FOREIGN KEY (`MAC_node`)
+                REFERENCES 'Node_appliance' (`MAC_node`)
+                ON DELETE NO ACTION
+                ON UPDATE NO ACTION 
+                NOT DEFERRABLE);
+
+
+CREATE TABLE Consumer (
+                id_consumer INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                UC INTEGER NOT NULL,
+                MAC_node VARCHAR(17) NOT NULL,
+		CONSTRAINT `Node_appliance_Consumer_fk`
+                FOREIGN KEY (`MAC_node`)
+                REFERENCES 'Node_appliance' (`MAC_node`)
+                ON DELETE NO ACTION
+                ON UPDATE NO ACTION 
+                NOT DEFERRABLE);
+
+CREATE TABLE User (
+                id_user INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                login VARCHAR NOT NULL,
+                password VARCHAR NOT NULL,
+		type_user INTEGER NOT NULL
+		 );
+
+
+
+CREATE TABLE Schedule(
+                id_schedule INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                inicio time,
+                fim time,
+                id_user INTEGER NOT NULL,
+
+                MAC_node VARCHAR(17) NOT NULL,
+
+		CONSTRAINT `Consumer_Schedule_fk`
+                FOREIGN KEY (`id_user`)
+                REFERENCES 'User' (`id_user`)
+		ON DELETE NO ACTION
+                ON UPDATE NO ACTION 
+                NOT DEFERRABLE,
+
+                CONSTRAINT `Node_appliance_Schedule_fk`
+                FOREIGN KEY (`MAC_node`)
+                REFERENCES 'Node_appliance' (`MAC_node`)
+
+                ON DELETE NO ACTION
+                ON UPDATE NO ACTION 
+                NOT DEFERRABLE);
+              
+
+
+
+
+
+ALTER TABLE Node_appliance ADD CONSTRAINT Appliance_type_Node_appliance_fk
+
+CONSTRAINT ` Appliance_type_Node_appliance_fk`
+    FOREIGN KEY (`id_appliance_type`)
+    REFERENCES 'Appliance_type' (`id_appliance_type`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION 
+    NOT DEFERRABLE;
+CREATE INDEX Appliance_type_Node_appliance_fk_idx ON Node_appliance (id_appliance_type);
+
+
+
+
+
+
+
+
+
+
+CONSTRAINT `fk_Titulo_has_Area_Titulo`
+    FOREIGN KEY (`Titulo_idTitulo`)
+    REFERENCES `Titulo` (`idTitulo`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Titulo_has_Area_Area1`
+    FOREIGN KEY (`Area_idArea`)
+    REFERENCES `Area` (`idArea`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Titulo_has_Area_Estrato1`
+    FOREIGN KEY (`Estrato_idEstrato`)
+    REFERENCES `Estrato` (`idEstrato`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+CREATE INDEX fk_Titulo_has_Area_Area1_idx ON Titulo_has_Area (Area_idArea);
+CREATE INDEX fk_Titulo_has_Area_Titulo_idx ON Titulo_has_Area (Titulo_idTitulo);
+CREATE INDEX fk_Titulo_has_Area_Estrato1_idx ON Titulo_has_Area (Estrato_idEstrato);
+
+=================InserT=================
+
+==================================================
+
+
+INSERT INTO consumer (login,password,type_user,uc,mac_node) VALUES("ltcd","costelinha",1,560098,'a4:1f:72:f8:b7:a8')
+
+INSERT INTO Data_consumer(time_consumer,tension,current,MAC_node) VALUES ( datetime('now'),08.90,12.56,"a4:1f:72:f8:b7:a8");
+
+INSERT INTO Node_applianc(Mac_node,status,priority,id_appliance) VALUES ("+str(mac)+", 0f,"+str(priority)+","+id_appliance+");
+
+UPDATE appliance_type SET icon="icon_air_conditioning" where id_appliance_type=1; 
+
+UPDATE appliance_type SET icon="icon_computer" where id_appliance_type=2;
+UPDATE appliance_type SET icon="icon_notebook" where id_appliance_type=3;
+UPDATE appliance_type SET icon="icon_dvd_player" where id_appliance_type=4;
+UPDATE appliance_type SET icon="icon_electric_heating" where id_appliance_type=5;
+UPDATE appliance_type SET icon="icon_freezer" where id_appliance_type=6;
+UPDATE appliance_type SET icon="icon_radio" where id_appliance_type=7;
+UPDATE appliance_type SET icon="icon_portable_stereo" where id_appliance_type=8;
+UPDATE appliance_type SET icon="icon_coffee_maker" where id_appliance_type=9;
+UPDATE appliance_type SET icon="icon_printer" where id_appliance_type=10;
+UPDATE appliance_type SET icon="icon_refrigerator" where id_appliance_type=11;
+UPDATE appliance_type SET icon="icon_stereo" where id_appliance_type=12;
+UPDATE appliance_type SET icon="icon_telephones" where id_appliance_type=13;
+UPDATE appliance_type SET icon="icon_television" where id_appliance_type=14;
+UPDATE appliance_type SET icon="icon_video_game_console" where id_appliance_type=15;
+UPDATE appliance_type SET icon="icon_videocassette" where id_appliance_type=16;
+UPDATE appliance_type SET icon="icon_energy_star_ac" where id_appliance_type=17;
+UPDATE appliance_type SET icon="icon_electric_stove" where id_appliance_type=18;
+UPDATE appliance_type SET icon="icon_microwave_oven" where id_appliance_type=19;
+UPDATE appliance_type SET icon="icon_dishwasher" where id_appliance_type=20;
+UPDATE appliance_type SET icon="icon_electric_dryer" where id_appliance_type=21;
+UPDATE appliance_type SET icon="icon_clothes_washer" where id_appliance_type=22;
+UPDATE appliance_type SET icon="icon_electric_hot_water_heater" where id_appliance_type=23;
+UPDATE appliance_type SET icon="icon_video_recorder" where id_appliance_type=24;
+UPDATE appliance_type SET icon="icon_lamp_incandescent" where id_appliance_type=25;
+UPDATE appliance_type SET icon="icon_lamp_compact_fluorescent_light" where id_appliance_type=26;
+UPDATE appliance_type SET icon="icon_lamp_halogen" where id_appliance_type=27;
+UPDATE appliance_type SET icon="icon_lamp_fluorescent" where id_appliance_type=28;
+
+
+====================QUERxvideoYS================
+==========================================
+
+Select sum(tension) from Data_consumer;
+Select sum(current) from Data_consumer;
+Select count(*) from Data_consumer;
+
+or
+#import json
+
+Select * FROM Data_consumer;
+
+UPDATE node_appliance SET  = "+str(x)+" WHERE  MAC_node = "+str(x)
+
+
+SELECT Mac_node, description, priority,status 
+FROM node_appliance as a, Appliance_type as b
+where  a.id_appliance_type=b.id_appliance_type
+
+DELETE FROM node_appliance WHERE mac_node="+str(mac)
+ 
+==========================================
+
+
+
+
+http://10.10.163.186:8085/login?username=" + login + "&password=" + pass
+
+http://192.168.0.5:8085/insert?mac="\\x00\\x13\\xa2\\x00\\x40\\xae\\xc5\\xbe"&priority=LOW&id_appliance=4
+http://192.168.0.5:8085/remove?mac="\\x00\\x13\\xa2\\x00\\x40\\xae\\xc5\\xbe"
+
+
+import matplotlib.pyplot as plt
+import datetime
+
+x = [datetime.datetime(2011, 1, 4, 0, 0),
+         datetime.datetime(2011, 1, 5, 0, 0),
+         datetime.datetime(2011, 1, 6, 0, 0)]
+y = [4, 9, 2]
+z=[1,2,3]
+k=[11,12,13]
+
+ax = plt.subplot(111)![enter image description here][1]
+ax.bar(x, y,width=0.5,color='b',align='center')
+ax.bar(x, z,width=0.5,color='g',align='center')
+ax.bar(x, k,width=0.5,color='r',align='center')
+ax.xaxis_date()
+
+plt.show()
+
+
