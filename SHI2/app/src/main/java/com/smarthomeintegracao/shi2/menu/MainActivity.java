@@ -23,6 +23,7 @@ import com.smarthomeintegracao.shi2.chart.RealtimeLineChartActivity;
 import com.smarthomeintegracao.shi2.dao.LinguagemDataSource;
 import com.smarthomeintegracao.shi2.fragments.FragmentChartReal;
 import com.smarthomeintegracao.shi2.fragments.FragmentEquipment;
+import com.smarthomeintegracao.shi2.fragments.FragmentOpChart;
 import com.smarthomeintegracao.shi2.fragments.FragmentSetting;
 ;
 import com.smarthomeintegracao.shi2.login.LoginActivity;
@@ -59,6 +60,16 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerC
         mNavigationDrawerFragment = (NavigationDrawerFragment) getFragmentManager().findFragmentById(R.id.fragment_drawer);
         mNavigationDrawerFragment.setTextView(name, type);
         mNavigationDrawerFragment.setup(R.id.fragment_drawer, (DrawerLayout) findViewById(R.id.drawer), mToolbar);
+
+        Fragment fragment = null;
+
+        fragment = new FragmentEquipment();
+
+        android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
+
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, fragment)
+                .commit();
     }
 
     public void alerDialog2() {
@@ -151,7 +162,7 @@ public class MainActivity extends ActionBarActivity implements NavigationDrawerC
                 actionBar.setTitle("   Statistic");
                 actionBar.setIcon(getResources().getDrawable(R.drawable.statistic2));
 
-                fragment = new FragmentChartReal();
+                fragment = new FragmentOpChart();
 
                 break;
 

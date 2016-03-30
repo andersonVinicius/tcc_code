@@ -33,19 +33,21 @@ import com.smarthomeintegracao.shi2.util.NetworkUtils;
 public class FragmentAdd extends Fragment {
 
 
-   private String[] opc2 ={"--                                                                        ",
-            "Low","Medium","High"};
-    private int[] imageId=new int[40] ;
-    private static String receiver ;
+    private String[] opc2 = {"--                                                                        ",
+            "Low", "Medium", "High"};
+    private int[] imageId = new int[40];
+    private static String receiver;
+
     private BufferedReader streamReader;
     private StringBuilder jsonStrBuilder;
     private static View rootView;
     private ReadJsonAsyncTask conexao;
     private String ip;
-     String mac;
-     String priority;
-     Spinner spn2;
+    String mac;
+    String priority;
+    Spinner spn2;
     EditText text;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,7 +62,7 @@ public class FragmentAdd extends Fragment {
         //conexao;
         connectIp("/appliances/");
 
-        spn2= (Spinner) rootView.findViewById(R.id.spinner4);
+        spn2 = (Spinner) rootView.findViewById(R.id.spinner4);
 
 
         ArrayAdapter<String> adp2 = new ArrayAdapter<String>(
@@ -70,22 +72,21 @@ public class FragmentAdd extends Fragment {
 
 
         spn2.setAdapter(adp2);
-        // Inflate the layout for this fragment
+
         return rootView;
     }
-    public void connectIp(String param){
+
+    public void connectIp(String param) {
         LinguagemDataSource lsd = new LinguagemDataSource(getActivity());
-        ip=lsd.getIp().trim();
+        ip = lsd.getIp().trim();
         Log.i("connectIp()", ip);
-        conexao=new ReadJsonAsyncTask();
-        conexao.execute(ip+param);
+        conexao = new ReadJsonAsyncTask();
+        conexao.execute(ip + param);
     }
 
-
-    // TODO: Rename method, update argument and hook method into UI event
     public String[] readJson(String url) {
         InputStream is = null;
-        String[] strArray ={""} ;
+        String[] strArray = {""};
 
         try {
             is = NetworkUtils.OpenHttpConnection(url, getActivity().getApplicationContext());
@@ -104,23 +105,23 @@ public class FragmentAdd extends Fragment {
             }
             Log.i("@@@JSON Equip:", jsonStrBuilder.toString());
             //transformado em JSONObject
-            if (!jsonStrBuilder.toString().equals("cadastrado com sucesso!")){
+            if (!jsonStrBuilder.toString().equals("cadastrado com sucesso!")) {
                 JSONObject jObj = new JSONObject(jsonStrBuilder.toString());
 
-            JSONArray jArray = jObj.getJSONArray("data");
-            strArray = new String[jArray.length()];
+                JSONArray jArray = jObj.getJSONArray("data");
+                strArray = new String[jArray.length()];
 
-            for (int i = 0; i < jArray.length(); i++) {
-                JSONObject jObject = jArray.getJSONObject(i);
-                strArray[i] = jObject.getString("description");
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject jObject = jArray.getJSONObject(i);
+                    strArray[i] = jObject.getString("description");
 
-                //imageId[i] = GetImage(getActivity(), jObject.getString("icon"));
+                    //imageId[i] = GetImage(getActivity(), jObject.getString("icon"));
+                }
+            } else {
+                strArray[0] = "cadastrado";
             }
-        }else{
-                strArray[0]="cadastrado";
-            }
 
-        }catch(IOException ie){
+        } catch (IOException ie) {
             Log.i("readJson", ie.getLocalizedMessage());
         } catch (JSONException e) {
             Log.i("readJson", e.getLocalizedMessage());
@@ -128,12 +129,6 @@ public class FragmentAdd extends Fragment {
 
         return strArray;
     }
-
-//    public static int GetImage(Context c, String ImageName) {
-//        Log.i("@@@JSON Equip_img:", ImageName.toString());
-//        return c.getResources().getIdentifier(ImageName, "drawable", c.getPackageName());
-//    }
-
 
 
     private class ReadJsonAsyncTask extends AsyncTask<String, Void, String[]> {
@@ -150,7 +145,7 @@ public class FragmentAdd extends Fragment {
 
             Log.i("_FROM_FragmentEq res :", result.toString());
             final Spinner spn = (Spinner) rootView.findViewById(R.id.spinner2);
-            if(!result[0].equals("cadastrado")){
+            if (!result[0].equals("cadastrado")) {
                 ArrayAdapter<String> adp = new ArrayAdapter<String>(
                         getActivity(),
                         android.R.layout.simple_spinner_dropdown_item, result);
@@ -160,7 +155,7 @@ public class FragmentAdd extends Fragment {
                 final EditText text = (EditText) rootView.findViewById(R.id.editText3);
 
 
-                Button btn  = (Button) rootView.findViewById(R.id.button2);
+                Button btn = (Button) rootView.findViewById(R.id.button2);
                 btn.setOnClickListener(new View.OnClickListener() {
                     // String teste = web[position];
                     // Toast.makeText(view.getContext(), "Clicked Laugh Vote", Toast.LENGTH_SHORT).Show();
@@ -169,24 +164,24 @@ public class FragmentAdd extends Fragment {
 
                         int marcado = spn.getSelectedItemPosition();
 
-                        mac=text.getText().toString();
-                        priority=spn2.getSelectedItem().toString();
+                        mac = text.getText().toString();
+                        priority = spn2.getSelectedItem().toString();
 
-                        if (!mac.equals("")){
+                        if (!mac.equals("")) {
                             Toast.makeText(getActivity(), marcado + " is Checked!!", Toast.LENGTH_SHORT).show();
-                            marcado = marcado+1;
+                            marcado = marcado + 1;
                             //new ReadJsonAsyncTask().execute("http://10.11.81.233:8085/insert?mac='"+mac+"'&priority='"+priority+"'&id_appliance="+marcado);
-                            connectIp("/insert?mac='"+mac+"'&priority='"+priority+"'&id_appliance="+marcado);
+                            connectIp("/insert?mac='" + mac + "'&priority='" + priority + "'&id_appliance=" + marcado);
 
 
-                                    Fragment fragment = new FragmentAdd();
+                            Fragment fragment = new FragmentAdd();
                             android.support.v4.app.FragmentManager fragmentManager = getFragmentManager();
 
                             fragmentManager.beginTransaction()
                                     .replace(R.id.container, fragment)
                                     .commit();
 
-                        }else{
+                        } else {
                             Toast.makeText(getActivity(), "Insert Address Mac! ", Toast.LENGTH_SHORT).show();
                         }
 
@@ -197,10 +192,10 @@ public class FragmentAdd extends Fragment {
             }
 
 
-                //  checkUser(receiver);
+            //  checkUser(receiver);
 
 
-                Log.i("_FROM_FragmentEq res :", result.toString());
+            Log.i("_FROM_FragmentEq res :", result.toString());
 
         }
 

@@ -16,13 +16,13 @@ BAUD_RATE = 9600
 # def hex(bindata):
 #     return ''.join('%02x' % ord(byte) for byte in bindata)
 
-# def decodeReceivedFrame(data):
-#             source_addr_long = data['source_addr_long']
-#             source_addr = data['source_addr']
-#             id = data['id']
-#             samples = data['rf_data']
-#           #  options = toHex(data['options'])
-#             return [source_addr_long, samples]
+def decodeReceivedFrame(data):
+            source_addr_long = data['source_addr_long']
+            source_addr = data['source_addr']
+            id = data['id']
+            samples = data['rf_data']
+          #  options = toHex(data['options'])
+            return [source_addr_long, source_addr]
 
 def regularTensao110(tension):
 
@@ -84,7 +84,7 @@ ser = serial.Serial(PORT, BAUD_RATE)
 # Create API object
 xbee = ZigBee(ser)
 c1 = DAOLampada()
-
+xbee.tx(dest_addr_long="\x00\x13\xa2\x00\x40\xae\xc5\xbe", dest_addr="\xff\xff", data ='l')
 # Continuously read and print packets
 while True:
     try:
@@ -98,6 +98,7 @@ while True:
         #print decodedData
      	#print (xbee.receive())
           data=response['rf_data'].split("#")
+          adrss=decodeReceivedFrame(response)
           print data
           #c1.inserir(data[0].replace("\x00",""),data[1].replace("\x00",""))
         #res = 
@@ -106,8 +107,9 @@ while True:
           #    c1.inserir(data[0].replace("\x00",""),110)
           tension=int(str(data[1].replace("\x00","")))
           tension=regularTensao110(tension)
+          print str(adrss)
           print str(tension)+"V"
-          c1.inserir(data[0].replace("\x00",""),tension)
+          #c1.inserir(data[0].replace("\x00",""),tension)
          # print "current : " + data[0]
          # print repr(data[0].replace("\x00",""))
          # print"\n"

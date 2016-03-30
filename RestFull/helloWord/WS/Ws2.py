@@ -61,20 +61,20 @@ tasks = [
 
 
 #ZIGBEE_Sender
-# PORT = '/dev/ttyUSB0'
-# BAUD_RATE = 9600
+PORT = '/dev/ttyUSB0'
+BAUD_RATE = 9600
 
-# # Open serial port
-# ser = serial.Serial(PORT, BAUD_RATE)
+# Open serial port
+ser = serial.Serial(PORT, BAUD_RATE)
 
-# # Create API object
-# xbee = ZigBee(ser)
-# import pprint
-# pprint.pprint(xbee.api_commands)
-# pprint.pprint(xbee.api_responses)
+# Create API object
+xbee = ZigBee(ser)
+import pprint
+pprint.pprint(xbee.api_commands)
+pprint.pprint(xbee.api_responses)
 
-# DEST_ADDR_LONG ='\x00\x13\xa2\x00\x40\xae\xfd\x8e'
-# addr = '\x51\x65'
+dest_addr_long ='\x00\x13\xa2\x00\x40\xae\xc5\xbe'
+addr = '\x51\x65'
 
 # ser.close()
 
@@ -84,15 +84,8 @@ def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 #consulta KW
 @app.route("/")
-def hello():
-    # c1 = DAOLampada()
-    # if c1.ObterStatus()==0:
-      
-    #     c1.inserir(random.uniform(58.8, 70.9))
-    #     print "inserindo ..";
-    #     return str(c1.obter())
-    # else:
-        #return "0.0"
+def randon():
+
         return str(random.uniform(124, 127))
 
 #Inserir_equipamento
@@ -103,6 +96,19 @@ def InsertEquipment():
     id_appliance = request.args.get('id_appliance')
     c1 = DAOLampada()
     c1.AddEquipment(mac,priority,id_appliance)
+      
+    #     c1.inserir(random.uniform(58.8, 70.9))
+    #     print "inserindo ..";
+    #     return str(c1.obter())
+    # else:
+#Edit_equipamento
+@app.route('/edit', methods=['GET', 'POST'])
+def editEquipment():
+    mac = request.args.get('mac')
+    priority = request.args.get('priority')
+    id_appliance = request.args.get('id_appliance')
+    c1 = DAOLampada()
+    c1.EditEquipment(mac,priority,id_appliance)
       
     #     c1.inserir(random.uniform(58.8, 70.9))
     #     print "inserindo ..";
@@ -160,8 +166,27 @@ def getEquipaments():
 
      return c1.ConsultEquipment()
 
-#Obter_consumer
-@app.route('/voltage/', methods=['GET', 'POST'])
+@app.route('/macs/')
+def getMacs():
+     # array=[]
+     # lista = ["EQ1","EQ2","EQ3"] 
+     c1 = DAOLampada()
+     array=c1.ObterMacs()
+     for i in range(0,len(array)):
+         print array[i]
+         c1.ConsultEquipTC(array[i])
+    #     c1.inserir(random.uniform(58.8, 70.9))
+    #     print "inserindo ..";
+    #     return str(c1.obter())
+    # else:
+     
+     
+
+     return str(c1.ObterMacs())
+
+
+#Obter_RealTime Volatagem
+@app.route('/voltage', methods=['GET', 'POST'])
 def getVoltage():
     mac = request.args.get('mac')  
        # lista = ["EQ1","EQ2","EQ3"] 
@@ -177,6 +202,14 @@ def getVoltage():
 
     return c1.obterTimeR(mac)
 
+@app.route('/consult', methods=['GET', 'POST'])
+def getConsultEquipmentToMac():
+    mac = request.args.get('mac')
+    print "getConsultEquipmentToMac    |   "+mac  
+    c1=DAOLampada()
+    result=c1.ConsultEquipmentToMac(mac)
+    return result
+
 @app.route('/appliances/')
 def getAppliances():
     c1=DAOLampada()
@@ -187,20 +220,39 @@ def getAppliances():
 #verificar status ligado e desligado
 #@app.route('/sts/<int:task_id>', methods=['GET'])
 
-#Enviar status dos equipamentos
+# Enviar status dos equipamentos(off/on)
 @app.route('/status', methods=['GET', 'POST'])
 def status():
     status = request.args.get('status')
     mac = request.args.get('mac')
+    print status+" | "+mac
     c1 = DAOLampada()
     c1.UpStatus(status,mac)
-    if status==1:
+    if str(status)=="'on'":
       #c1.UpStatus(status,mac)
        print "send ligado"
-       xbee.tx(dest_addr_long=mac, dest_addr=addr, data ='l')
+       xbee.tx(dest_addr_long="\x00\x13\xa2\x00\x40\xae\xc5\xbe", dest_addr="\xff\xff", data ='l')
     else:
        print "send Desligado"
-       xbee.tx(dest_addr_long=mac, dest_addr=addr, data ='d')
+       xbee.tx(dest_addr_long="\x00\x13\xa2\x00\x40\xae\xc5\xbe", dest_addr="\xff\xff", data ='d')
+    return "Ok Update aconteceu "   
+
+@app.route('/status/<int:task_id>', methods=['GET'])
+def status2(task_id):
+    # xbee = ZigBee(ser)
+    # status = request.args.get('status')
+    # mac = request.args.get('mac')
+    # print status+" | "+mac
+    # c1 = DAOLampada()
+    # c1.UpStatus(status,mac)
+    if task_id==0:
+      #c1.UpStatus(status,mac)
+       print "send ligado"
+       xbee.tx(dest_addr_long="\x00\x13\xa2\x00\x40\xae\xc5\xbe", dest_addr="\xff\xff", data ='l')
+    else:
+       print "send Desligado"
+       xbee.tx(dest_addr_long="\x00\x13\xa2\x00\x40\xae\xc5\xbe", dest_addr="\xff\xff", data ='d')
+    ser.close() 
     return "Ok Update aconteceu "   
 
 #autenticar user
@@ -218,6 +270,15 @@ def login():
     else:
        return "F"
 
+#------------------------------------------
+#========Calcular_Potencia_KwH=============
+#------------------------------------------       
+def convertKw(self,tension, current):
+    
+    tension=tensio*current 
+    result=(tension/3600)/1000
+    print result +" KWH"
+    return result
 
 #------------------------------------------
 #========Rotina_Server=====================
@@ -262,7 +323,7 @@ def  agenda_fim(threadName, delay):
 #start_WS
 if __name__ == "__main__":
    app.debug = True	
-   app.run(host='192.168.0.6', port=8085)
+   app.run(host='10.11.86.250', port=8085)
 
 
    

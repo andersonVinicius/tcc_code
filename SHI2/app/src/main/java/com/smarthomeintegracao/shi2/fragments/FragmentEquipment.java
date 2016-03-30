@@ -32,55 +32,72 @@ import com.smarthomeintegracao.shi2.util.NetworkUtils;
 public class FragmentEquipment extends Fragment {
     ListView list;
     String[] macs;
-    int[] imageId=new int[40] ;
-    private static String receiver ;
+    Boolean[] status;
+    int[] imageId = new int[40];
+    private static String receiver;
     private BufferedReader streamReader;
     private StringBuilder jsonStrBuilder;
     static View rootView;
-    private String ip="http://192.168.0.6:8085/equips/";
+    private String ip = "http://192.168.0.6:8085/equips/";
     private ReadJsonAsyncTask conexao;
-   // private Thread td;
-
-
+    // private Thread td;
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-         rootView = inflater.inflate(R.layout.fragment_list_equipment, container, false);
-         connectIp();
+        rootView = inflater.inflate(R.layout.fragment_list_equipment, container, false);
+        connectIp();
 
         // Inflate the layout for this fragment
         return rootView;
     }
-    public void connectIp(){
+
+    public Boolean getStatus(String status) {
+        boolean response;
+        if (status.toString().equals("0ff")) {
+            response = false;
+
+        } else {
+            response = true;
+
+        }
+
+        return response;
+    }
+
+    public static int GetImage(Context c, String ImageName) {
+        Log.i("@@@JSON Equip_img:", ImageName.toString());
+        return c.getResources().getIdentifier(ImageName, "drawable", c.getPackageName());
+    }
+
+    public void connectIp() {
         LinguagemDataSource lsd = new LinguagemDataSource(getActivity());
-        ip=lsd.getIp().trim();
+        ip = lsd.getIp().trim();
         Log.i("connectIp()", ip);
-        conexao=new ReadJsonAsyncTask();
-        conexao.execute(ip+"/equips/");
+        conexao = new ReadJsonAsyncTask();
+        conexao.execute(ip + "/equips/");
     }
 
     public String[] readJson(String url) {
         InputStream is = null;
-        String[] strArray ={""} ;
+        String[] strArray = {""};
 
         try {
             is = NetworkUtils.OpenHttpConnection(url, getActivity().getApplicationContext());
             //leitura
-            if(is.equals(null))
+            if (is.equals(null))
                 Log.i("STATUS", "Connect refused!");
             streamReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
-          //  Log.i("SSSSSSSSSSSSSSSSS", streamReader.readLine());
-           // StringBuilder sb = new StringBuilder();
+            //  Log.i("SSSSSSSSSSSSSSSSS", streamReader.readLine());
+            // StringBuilder sb = new StringBuilder();
             jsonStrBuilder = new StringBuilder();
             Log.i("1° aqui", "ok");
             String inputStr;
-           // final Drawable d = getDrawable("tv",null);
+            // final Drawable d = getDrawable("tv",null);
             //add ao StringBuilder
             while ((inputStr = streamReader.readLine()) != null) {
                 jsonStrBuilder.append(inputStr);
-
 
 
             }
@@ -89,17 +106,22 @@ public class FragmentEquipment extends Fragment {
             JSONObject jObj = new JSONObject(jsonStrBuilder.toString());
 
             JSONArray jArray = jObj.getJSONArray("data");
+
             strArray = new String[jArray.length()];
             macs = new String[jArray.length()];
-            for(int i = 0; i < jArray.length(); i++){
+            status = new Boolean[jArray.length()];
+
+            for (int i = 0; i < jArray.length(); i++) {
                 JSONObject jObject = jArray.getJSONObject(i);
+                //set valores nos vetores
                 strArray[i] = jObject.getString("description");
-                macs[i]= jObject.getString("Mac_node");
-               // Log.i("Mac 0:",macs[i]);
+                macs[i] = jObject.getString("Mac_node");
+                status[i] = getStatus(jObject.getString("status").toString());
                 imageId[i] = GetImage(getActivity(), jObject.getString("icon"));
+
             }
 
-        }catch(IOException ie){
+        } catch (IOException ie) {
 
 //            Log.i("STATUS", "Connect refused!");
 //            Log.i("readJson", ie.getLocalizedMessage());
@@ -108,29 +130,24 @@ public class FragmentEquipment extends Fragment {
 
         } catch (JSONException e) {
 
-           // Log.i("STATUS", "Connect refused!");
+            // Log.i("STATUS", "Connect refused!");
             Log.i("readJson", e.getLocalizedMessage());
         }
 
         return strArray;
     }
 
-    public static int GetImage(Context c, String ImageName) {
-        Log.i("@@@JSON Equip_img:", ImageName.toString());
-        return c.getResources().getIdentifier(ImageName, "drawable", c.getPackageName());
-    }
-
-
 
     private class ReadJsonAsyncTask extends AsyncTask<String, Void, String[]> {
         ProgressDialog pDialog;
+
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
             // Showing progress dialog 
             pDialog = new ProgressDialog(getActivity());
             pDialog.setMessage("Please wait...");
-            pDialog.setCancelable(false);
+           // pDialog.setCancelable(false);
             pDialog.show();
 
         }
@@ -150,25 +167,25 @@ public class FragmentEquipment extends Fragment {
 
             Log.i("_FROM_FragmentEq res :", result[0].toString());
             try {
-               // if (!result[0].equals("")) {
-                    Log.i("<-----------O MAC: ", macs.toString());
-                    AdapterListEquipment adapter = new
-                            AdapterListEquipment(getActivity(), result, imageId, macs);
+                // if (!result[0].equals("")) {
+                Log.i("<-----------O MAC: ", macs.toString());
+                AdapterListEquipment adapter = new
+                        AdapterListEquipment(getActivity(), result, imageId, macs, status);
 
-                    list = (ListView) rootView.findViewById(R.id.listView2);
-                    list.setAdapter(adapter);
-                    list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                list = (ListView) rootView.findViewById(R.id.listView2);
+                list.setAdapter(adapter);
+                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                        @Override
-                        public void onItemClick(AdapterView<?> parent, View view,
-                                                int position, long id) {
-                            //Toast.makeText(getActivity(), "You Clicked at " + equipament[+position], Toast.LENGTH_SHORT).show();
+                    @Override
+                    public void onItemClick(AdapterView<?> parent, View view,
+                                            int position, long id) {
+                        //Toast.makeText(getActivity(), "You Clicked at " + equipament[+position], Toast.LENGTH_SHORT).show();
 
-                        }
-                    });
-              //  }
+                    }
+                });
+                //  }
 
-              //  checkUser(receiver);
+                //  checkUser(receiver);
 
 
                 Log.i("_FROM_FragmentEq res :", result.toString());
