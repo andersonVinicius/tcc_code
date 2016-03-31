@@ -106,19 +106,23 @@ public class FragmentEquipment extends Fragment {
             JSONObject jObj = new JSONObject(jsonStrBuilder.toString());
 
             JSONArray jArray = jObj.getJSONArray("data");
+            Log.i("@@@ jArray:", jArray.toString());
+            if(!jArray.toString().equals("[]")) {
+                strArray = new String[jArray.length()];
+                macs = new String[jArray.length()];
+                status = new Boolean[jArray.length()];
 
-            strArray = new String[jArray.length()];
-            macs = new String[jArray.length()];
-            status = new Boolean[jArray.length()];
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject jObject = jArray.getJSONObject(i);
+                    //set valores nos vetores
+                    strArray[i] = jObject.getString("description");
+                    macs[i] = jObject.getString("Mac_node");
+                    status[i] = getStatus(jObject.getString("status").toString());
+                    imageId[i] = GetImage(getActivity(), jObject.getString("icon"));
 
-            for (int i = 0; i < jArray.length(); i++) {
-                JSONObject jObject = jArray.getJSONObject(i);
-                //set valores nos vetores
-                strArray[i] = jObject.getString("description");
-                macs[i] = jObject.getString("Mac_node");
-                status[i] = getStatus(jObject.getString("status").toString());
-                imageId[i] = GetImage(getActivity(), jObject.getString("icon"));
-
+                }
+            }else{
+                strArray[0]="[]";
             }
 
         } catch (IOException ie) {
@@ -167,26 +171,27 @@ public class FragmentEquipment extends Fragment {
 
             Log.i("_FROM_FragmentEq res :", result[0].toString());
             try {
-                // if (!result[0].equals("")) {
-                Log.i("<-----------O MAC: ", macs.toString());
-                AdapterListEquipment adapter = new
-                        AdapterListEquipment(getActivity(), result, imageId, macs, status);
+                if(!result[0].equals("[]")) {
+                    // if (!result[0].equals("")) {
+                    Log.i("<-----------O MAC: ", macs.toString());
+                    AdapterListEquipment adapter = new
+                            AdapterListEquipment(getActivity(), result, imageId, macs, status);
 
-                list = (ListView) rootView.findViewById(R.id.listView2);
-                list.setAdapter(adapter);
-                list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    list = (ListView) rootView.findViewById(R.id.listView2);
+                    list.setAdapter(adapter);
+                    list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
-                    @Override
-                    public void onItemClick(AdapterView<?> parent, View view,
-                                            int position, long id) {
-                        //Toast.makeText(getActivity(), "You Clicked at " + equipament[+position], Toast.LENGTH_SHORT).show();
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view,
+                                                int position, long id) {
+                            //Toast.makeText(getActivity(), "You Clicked at " + equipament[+position], Toast.LENGTH_SHORT).show();
 
-                    }
-                });
-                //  }
+                        }
+                    });
+                    //  }
 
-                //  checkUser(receiver);
-
+                    //  checkUser(receiver);
+                }
 
                 Log.i("_FROM_FragmentEq res :", result.toString());
 

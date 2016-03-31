@@ -186,7 +186,21 @@ class DAOLampada:
       data.append(equipments)
   
   return jsonify( {'data': data } )  
+ 
+ def ConsultDescriptionToMac(self,mac_node):
+  print "Aqui No DAO   |  "+mac_node
+  conn=sqlite3.connect('/home/anderson/Documentos/tcc/RestFull/helloWord/no_central.sqlite3')
+  cursor=conn.execute("Select description FROM node_appliance as a, Appliance_type as b where a.id_appliance_type=b.id_appliance_type and Mac_node='"+str(mac_node)+"'");
+ # cursor=conn.execute("Select * from  Data_consumer where Mac_node like'%"+mac_node+"%' ORDER BY id_data_consumer ");
 
+ # res=cursor.fetchall()
+  #conn.close()
+  for res in cursor:
+      
+          return res[0]
+         
+
+   
 
  def ObterMacs(self):
   conn=sqlite3.connect('/home/anderson/Documentos/tcc/RestFull/helloWord/no_central.sqlite3')
@@ -199,9 +213,10 @@ class DAOLampada:
   return macs
 
  def ConsultEquipTC(self,mac):
+  c1=DAOLampada()
   conn=sqlite3.connect('/home/anderson/Documentos/tcc/RestFull/helloWord/no_central.sqlite3')
-  cursor=conn.execute("select count(), sum(current), sum(tension),mac_node from data_consumer  where mac_node ="+str(mac));
-  data=[]
+  cursor=conn.execute("select count(), sum(current), sum(tension),mac_node from data_consumer  where mac_node ='"+str(mac)+"'");
+  data=c1.ConsultDescriptionToMac(mac)
  # res=cursor.fetchall()
   # conn.close()
   for res in cursor:
@@ -210,11 +225,12 @@ class DAOLampada:
           "current":res[1],
           "tension":res[2],
           "mac_node":res[3],
+          "description": data
           
       } 
-      data.append(equipments)
+      # //data.append(equipments)
   
-  return jsonify( {'data': data } )  
+  return equipments 
 
 #c1 = DAOLampada()
 #print c1.obter()

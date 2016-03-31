@@ -1,8 +1,10 @@
 
 package com.smarthomeintegracao.shi2.chart;
 
+import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
@@ -11,7 +13,10 @@ import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
@@ -28,19 +33,42 @@ import com.github.mikephil.charting.highlight.Highlight;
 import com.github.mikephil.charting.interfaces.datasets.IDataSet;
 import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 import com.github.mikephil.charting.utils.ColorTemplate;
+import com.smarthomeintegracao.shi2.dao.LinguagemDataSource;
+import com.smarthomeintegracao.shi2.fragments.AdapterListEquipment;
 import com.smarthomeintegracao.shi2.util.DemoBase;
 import com.smarthomeintegracao.shi2.R;
+import com.smarthomeintegracao.shi2.util.NetworkUtils;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class PieChartActivity extends DemoBase implements OnSeekBarChangeListener,
         OnChartValueSelectedListener {
+    ListView list;
+    String[] macs;
+    Boolean[] status;
+    int[] imageId = new int[40];
 
     private PieChart mChart;
     private SeekBar mSeekBarX, mSeekBarY;
     private TextView tvX, tvY;
-    private String[] equip={"Tv","Geladeira","Lampada","computador"};
-    private float kw[]= {225, 330, 169, 400};
+    String[] equip;
+    double tension[];
+    double current[];
+    int quant[];
+    private static String receiver;
+    private BufferedReader streamReader;
+    private StringBuilder jsonStrBuilder;
+    private String ip;
+    private ReadJsonAsyncTask conexao;
+    String[] strArray = {""};
 
     private Typeface tf;
 
@@ -49,6 +77,7 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
         super.onCreate(savedInstanceState);
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        connectIp();
         setContentView(R.layout.activity_piechart);
 
         tvX = (TextView) findViewById(R.id.tvXMax);
@@ -97,7 +126,7 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
         // add a selection listener
         mChart.setOnChartValueSelectedListener(this);
 
-        setData(3, 100);
+
 
         mChart.animateY(1400, Easing.EasingOption.EaseInOutQuad);
         // mChart.spin(2000, 0, 360);
@@ -108,6 +137,7 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
         l.setXEntrySpace(7f);
         l.setYEntrySpace(0f);
         l.setYOffset(0f);
+
     }
 
     @Override
@@ -180,12 +210,12 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
         tvX.setText("" + (mSeekBarX.getProgress() + 1));
         tvY.setText("" + (mSeekBarY.getProgress()));
 
-        setData(mSeekBarX.getProgress(), mSeekBarY.getProgress());
+       // setData(mSeekBarX.getProgress(), mSeekBarY.getProgress());
     }
 
-    private void setData(int count, float range) {
+    private void setData() {
 
-        float mult = range;
+       // float mult = range;
 
         ArrayList<Entry> yVals1 = new ArrayList<Entry>();
 
@@ -193,7 +223,7 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
         // xIndex (even if from different DataSets), since no values can be
         // drawn above each other.
         for (int i = 0; i < 4; i++) {
-            yVals1.add(new Entry( (kw[i]), i));
+            yVals1.add(new Entry( convertKw(current[i],tension[i],quant[i]), i));
         }
 
         ArrayList<String> xVals = new ArrayList<String>();
@@ -278,6 +308,143 @@ public class PieChartActivity extends DemoBase implements OnSeekBarChangeListene
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         // TODO Auto-generated method stub
+
+    }
+
+    public void connectIp() {
+        LinguagemDataSource lsd = new LinguagemDataSource(this);
+        ip = lsd.getIp().trim();
+        Log.i("connectIp()", ip);
+        conexao = new ReadJsonAsyncTask();
+        conexao.execute(ip +"/macs/");
+    }
+    //converter para KWH
+    public float convertKw(double curr, double tens,int qtd){
+
+        float pot;
+              pot = (float) (curr*tens)/qtd;
+              pot = (pot/3600)/1000;
+
+        return pot;
+    }
+
+    public String[] readJson(String url) {
+        InputStream is = null;
+
+
+        try {
+            is = NetworkUtils.OpenHttpConnection(url, this.getApplicationContext());
+            //leitura
+            if (is.equals(null))
+                Log.i("STATUS", "Connect refused!");
+            streamReader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+            //  Log.i("SSSSSSSSSSSSSSSSS", streamReader.readLine());
+            // StringBuilder sb = new StringBuilder();
+            jsonStrBuilder = new StringBuilder();
+            Log.i("1° aqui", "ok");
+            String inputStr;
+            // final Drawable d = getDrawable("tv",null);
+            //add ao StringBuilder
+            while ((inputStr = streamReader.readLine()) != null) {
+                jsonStrBuilder.append(inputStr);
+
+
+            }
+            Log.i("@@@JSON Equip:", jsonStrBuilder.toString());
+            //transformado em JSONObject
+            JSONObject jObj = new JSONObject(jsonStrBuilder.toString());
+
+            JSONArray jArray = jObj.getJSONArray("data");
+            Log.i("@@@ jArray:", jArray.toString());
+            if(!jArray.toString().equals("[]")) {
+                equip = new String[jArray.length()];
+                current = new double[jArray.length()];
+                tension = new double[jArray.length()];
+                quant =new int[jArray.length()];
+                macs = new String[jArray.length()];
+                status = new Boolean[jArray.length()];
+                Log.i("@@@ jArray Numberrr:",jArray.length()+"");
+
+                for (int i = 0; i < jArray.length(); i++) {
+                    JSONObject jObject = jArray.getJSONObject(i);
+                    //set valores nos vetores
+                    equip[i] = jObject.getString("description");
+                    //macs[i] = jObject.getString("Mac_node");
+                    current[i] = jObject.getDouble("current");
+                    tension[i] = jObject.getDouble("tension");
+                    quant[i] = (int) jObject.get("quant");
+
+                }
+            }else{
+                strArray[0]="[]";
+            }
+
+        } catch (IOException ie) {
+
+//            Log.i("STATUS", "Connect refused!");
+//            Log.i("readJson", ie.getLocalizedMessage());
+//            ip="http://192.168.0.6:8085/equips/";
+//            connectIp();
+
+        } catch (JSONException e) {
+
+            // Log.i("STATUS", "Connect refused!");
+            Log.i("readJson", e.getLocalizedMessage());
+        }
+
+        return equip;
+    }
+
+
+    private class ReadJsonAsyncTask extends AsyncTask<String, Void, String[]> {
+        ProgressDialog pDialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+//            // Showing progress dialog
+//            pDialog = new ProgressDialog(getApplication());
+//            pDialog.setMessage("Please wait...");
+//            // pDialog.setCancelable(false);
+//            pDialog.show();
+
+        }
+
+        @Override
+        protected String[] doInBackground(String... params) {
+            // TODO Auto-generated method stub
+            Log.i("#doInBackgroundlink :", params[0].toString());
+            return readJson(params[0]);
+        }
+
+
+        protected void onPostExecute(String[] result) {
+
+//            if (pDialog.isShowing())
+//                pDialog.dismiss();
+
+            Log.i("_FROM_FragmentEq res :", result[3].toString());
+
+            setData();
+
+        }
+
+//        public void checkUser(String receiver){
+//
+//            if (receiver.equals("T")) {
+//
+//
+//                if (type.equals("Utility")){
+//                   // callMainActivity_admin();
+//                }else{
+//                    callMainActivity_user();
+//                }
+//
+//            } else {
+//                Toast.makeText(getApplicationContext(), "Senha Invalida " + receiver, Toast.LENGTH_SHORT).show();
+//            }
+//
+//        }
 
     }
 }

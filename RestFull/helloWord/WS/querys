@@ -1,0 +1,19 @@
+UPDATE Appliance_type
+SET icon = "icon_tv"
+WHERE id_appliance_type="14";
+
+select count() ,sum(current), sum(tension) from data_consumer  where mac_node ="x00x13xa2x00x40Tvufra"
+
+http://10.11.86.250:8085+"/status?mac='\x00\x13\xa2\x00\x40\xae\xc5\xbe'&status='on'
+
+UPDATE Appliance_type
+SET description = "Tv"
+WHERE id_appliance_type="14";
+
+select count(), sum(current), sum(tension),a.mac_node, c.description 
+from data_consumer as a,node_appliance as b, Appliance_type as c  
+where b.id_appliance_type=c.id_appliance_type and b.mac_node='x00x13xa2x00x40Tvufra';
+
+select distinct(a.mac_node), c.description 
+from data_consumer as a,node_appliance as b, Appliance_type as c  
+where b.id_appliance_type=c.id_appliance_type and b.mac_node=a.mac_node ;

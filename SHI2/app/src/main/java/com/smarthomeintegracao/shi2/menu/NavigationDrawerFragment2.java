@@ -144,7 +144,7 @@ public class NavigationDrawerFragment2 extends Fragment implements NavigationDra
 
     public List<NavigationItem> getMenu() {
         List<NavigationItem> items = new ArrayList<NavigationItem>();
-        items.add(new NavigationItem("TV", getResources().getDrawable(R.drawable.tv)));
+        items.add(new NavigationItem("TV", getResources().getDrawable(R.drawable.icon_televison1)));
         items.add(new NavigationItem("  refrigerator", getResources().getDrawable(R.drawable.icon_geladeira)));
         items.add(new NavigationItem("washing machine", getResources().getDrawable(R.drawable.lavadora)));
         items.add(new NavigationItem("Computer", getResources().getDrawable(R.drawable.computer)));
